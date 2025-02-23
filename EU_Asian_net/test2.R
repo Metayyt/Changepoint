@@ -1,8 +1,8 @@
-
 library(ggplot2)
 library(reshape2)
-X=graphs[81:(80+cid +4),,]
-X=graphs[(80+cid+5):dim(graphs)[1],,]
+
+X=graphs[81:(80+cid +3),,]
+X=graphs[(80+cid+4):dim(graphs)[1],,]
 
 adj_a = X[1,,]
 for(i in 2:(dim(X)[1])){
@@ -10,15 +10,20 @@ for(i in 2:(dim(X)[1])){
 }
 adj_aver = adj_a / (dim(X)[1])
 
+# 找到全为0的列
 zero_cols = which(apply(adj_aver, 2, function(col) all(col == 0)))
 
+# non_zero_cols 是所有非零列
 non_zero_cols = setdiff(1:dim(X)[2], zero_cols)
 
+# Non zero columns  country
 non_zero_country = country[non_zero_cols]
+
 
 X_reduced = X[,-zero_cols,-zero_cols]
 n_reduced = dim(X_reduced)[1]
 p_reduced = dim(X_reduced)[2]
+
 
 ahat=matrix(rep(0,p_reduced^2),nrow=p_reduced)
 bhat=ahat
@@ -32,7 +37,7 @@ for(j in 1:p_reduced){
 ahat=(ahat+t(ahat))-diag(diag(ahat))
 bhat=(bhat+t(bhat))-diag(diag(bhat))
 
-q=1
+q=2
 # Cluster
 W1=ahat
 W2=1-bhat
@@ -60,12 +65,23 @@ which(nuhat==2)
 cluster_1_size = sum(nuhat == 1)
 cluster_2_size = sum(nuhat == 2)
 cluster_3_size = sum(nuhat == 3)
+##if cluster 1 is smaller than cluster 2, then swap the labels
+if(cluster_1_size < cluster_2_size){
+  nuhat[nuhat == 1] = 0
+  nuhat[nuhat == 2] = 1
+  nuhat[nuhat == 0] = 2
+}
+cluster_1_size = sum(nuhat == 1)
+cluster_2_size = sum(nuhat == 2)
+
 non_zero_order = non_zero_cols[order(nuhat)]  
 
-final_order = c(non_zero_order, zero_cols)
+# remove zero countries
+final_order = non_zero_order
 
 adj_aver_complete = adj_a / (dim(X)[1])
 
+# plot heatmap
 library(viridis)
 library(RColorBrewer)
 colors <- brewer.pal(9, "YlOrBr")
@@ -77,15 +93,14 @@ heatmap_plot <- ggplot(newa, aes(Var1, Var2, fill = value)) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(x = "", y = "")
-
-
+#heatmap_plot
+p <- length(final_order)
 heatmap_plot <- heatmap_plot +
-  geom_segment(aes(x = cluster_1_size + 0.5, xend = cluster_1_size + 0.5, y = 0.5, yend = p + 0.5), linetype = "solid", color = "black", size = 1) +
-  geom_segment(aes(x = 0.5, xend = p + 0.5, y = cluster_1_size + 0.5, yend = cluster_1_size + 0.5), linetype = "solid", color = "black", size = 1)
+  geom_segment(aes(x = cluster_1_size + 0.5, xend = cluster_1_size + 0.5, y = 0.5, yend = p + 0.5),
+               linetype = "solid", color = "black", size = 1) +
+  geom_segment(aes(x = 0.5, xend = p + 0.5, y = cluster_1_size + 0.5, yend = cluster_1_size + 0.5),
+               linetype = "solid", color = "black", size = 1)
 
-heatmap_plot <- heatmap_plot +
-  geom_segment(aes(x = cluster_1_size + cluster_2_size + 0.5, xend = cluster_1_size + cluster_2_size + 0.5, y = 0.5, yend = p + 0.5), linetype = "solid", color = "black", size = 1) +
- geom_segment(aes(x = 0.5, xend = p + 0.5, y = cluster_1_size + cluster_2_size + 0.5, yend = cluster_1_size + cluster_2_size + 0.5), linetype = "solid", color = "black", size = 1)
-
+#print plot
 print(heatmap_plot)
 

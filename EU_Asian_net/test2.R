@@ -10,10 +10,10 @@ for(i in 2:(dim(X)[1])){
 }
 adj_aver = adj_a / (dim(X)[1])
 
-# 找到全为0的列
+
 zero_cols = which(apply(adj_aver, 2, function(col) all(col == 0)))
 
-# non_zero_cols 是所有非零列
+
 non_zero_cols = setdiff(1:dim(X)[2], zero_cols)
 
 # Non zero columns  country

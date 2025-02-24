@@ -1,8 +1,8 @@
 library(ggplot2)
 library(reshape2)
 
-X=graphs[81:(80+cid +3),,]
-X=graphs[(80+cid+4):dim(graphs)[1],,]
+X=graphs[81:(80+cid +4),,]
+X=graphs[(80+cid+5):dim(graphs)[1],,]
 
 adj_a = X[1,,]
 for(i in 2:(dim(X)[1])){
@@ -10,12 +10,12 @@ for(i in 2:(dim(X)[1])){
 }
 adj_aver = adj_a / (dim(X)[1])
 
+# 
+zero_cols = which(apply(adj_aver, 2, function(col) all(col <0.3)))
 
-zero_cols = which(apply(adj_aver, 2, function(col) all(col == 0)))
-
-
+# non_zero_cols 
 non_zero_cols = setdiff(1:dim(X)[2], zero_cols)
-
+print(length(non_zero_cols))
 # Non zero columns  country
 non_zero_country = country[non_zero_cols]
 
@@ -81,6 +81,8 @@ final_order = non_zero_order
 
 adj_aver_complete = adj_a / (dim(X)[1])
 
+A= adj_aver_complete[final_order, final_order]
+all.equal(A, t(A))
 # plot heatmap
 library(viridis)
 library(RColorBrewer)
@@ -89,7 +91,7 @@ newa = melt(adj_aver_complete[final_order, final_order])
 heatmap_plot <- ggplot(newa, aes(Var1, Var2, fill = value)) +
   geom_tile() +
 #  scale_fill_gradientn(colors = colors) +
-  scale_fill_gradient2(low = "lightblue", high = "red", mid = "orange", midpoint =  0.5, limit = c(0, 1), space = "Lab", name = "Links") +
+  scale_fill_gradient2(low = "lightblue", high = "red", mid = "lightblue", midpoint =  0.25, limit = c(0, 1), space = "Lab", name = "Trade Frequency") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(x = "", y = "")
@@ -100,7 +102,11 @@ heatmap_plot <- heatmap_plot +
                linetype = "solid", color = "black", size = 1) +
   geom_segment(aes(x = 0.5, xend = p + 0.5, y = cluster_1_size + 0.5, yend = cluster_1_size + 0.5),
                linetype = "solid", color = "black", size = 1)
-
+#heatmap_plot <- heatmap_plot +
+#  geom_segment(aes(x = cluster_1_size +cluster_2_size + 0.5, xend = cluster_1_size +cluster_2_size + 0.5, y = 0.5, yend = p + 0.5),
+#               linetype = "solid", color = "black", size = 1) +
+#  geom_segment(aes(x = 0.5, xend = p + 0.5, y = cluster_1_size +cluster_2_size + 0.5, yend = cluster_1_size +cluster_2_size + 0.5),
+ #              linetype = "solid", color = "black", size = 1)
 #print plot
 print(heatmap_plot)
 

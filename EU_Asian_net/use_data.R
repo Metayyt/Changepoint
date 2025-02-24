@@ -18,6 +18,7 @@ for (i in 1 : dim(trade_df)[1]){
   record = trade_df[i,]
   
   graphs[record[[3]], record[[1]], record[[2]]] = 1
+  graphs[record[[3]], record[[2]], record[[1]]] = 1
 }
 
 # after adding following code, you can draw vertex with country name. I have checked
@@ -40,7 +41,7 @@ non_zero_cols = setdiff(1:dim(X)[2], zero_cols)
 non_zero_country = country[non_zero_cols]
 
 # 对非零列进行聚类
- = graphs[,-zero_cols,-zero_cols]
+X = graphs[,-zero_cols,-zero_cols]
 X=graphs[81:145,,] ##choose the data from 1950-2014
 n=dim(X)[1]
 p=dim(X)[2]
